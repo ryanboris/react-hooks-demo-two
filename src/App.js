@@ -4,11 +4,15 @@ import axios from 'axios';
 export default function App() {
   const [hits, setHits] = useState([]);
 
+  async function getHits() {
+    const response = await axios.get(
+      'http://hn.algolia.com/api/v1/search?query=reacthooks'
+    );
+    return setHits(response.data.hits);
+  }
+
   useEffect(() => {
-    axios
-      .get('http://hn.algolia.com/api/v1/search?query=reacthooks')
-      .then(response => setHits(response.data.hits))
-      .catch(e => console.error(e));
+    getHits();
   }, []);
 
   return (
