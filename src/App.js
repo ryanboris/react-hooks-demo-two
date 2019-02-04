@@ -1,5 +1,9 @@
 import React from 'react';
 
 export default function App() {
-  return <></>
+  return (
+    <>
+      <h2>Hey</h2>
+    </>
+  );
 }
