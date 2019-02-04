@@ -1,32 +1,24 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Spinner, Button } from 'reactstrap';
+import { Spinner } from 'reactstrap';
 import axios from 'axios';
-import styled from 'styled-components';
-
-const AppWrapper = styled.div`
-  form {
-    margin: 0 0 50px 0;
-    input {
-      margin: 40px 0 0 1%;
-    }
-    button {
-      margin: 0 1%;
-    }
-  }
-`;
 
 export default function App() {
   const [hits, setHits] = useState([]);
-  const [query, setQuery] = useState('react hooks');
+  const [query, setQuery] = useState('');
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
   const searchInputRef = useRef();
 
   async function getHits() {
     setLoading(true);
-    const response = await axios.get(
-      `http://hn.algolia.com/api/v1/search?query=${query}`
-    );
-    setHits(response.data.hits);
+    try {
+      const response = await axios.get(
+        `http://hn.algolia.com/api/v1/search?query=${query}`
+      );
+      setHits(response.data.hits);
+    } catch (err) {
+      setError(err);
+    }
     setLoading(false);
   }
 
@@ -42,40 +34,54 @@ export default function App() {
   const handleClearSearch = () => {
     setQuery('');
     searchInputRef.current.focus();
+    setHits([]);
   };
 
   return (
-    <AppWrapper>
-      <form onSubmit={handleSearch}>
+    <div className='container max-w-md mx-auto p-4 m-2 bg-purple-lightest shadow-lg rounded'>
+      <img
+        src='https://icon.now.sh/react/c0c'
+        alt='react logo'
+        className='float-right h-12'
+      />
+      <h1 className='test-grey-darkest font-thin'>Tech News</h1>
+      <form onSubmit={handleSearch} className='mb-2'>
         <input
           type='text'
+          placeholder='Search'
           onChange={event => setQuery(event.target.value)}
           value={query}
           ref={searchInputRef}
+          className='border p-1 rounded'
         />
-        <Button color='primary' size='sm' type='submit'>
+        <button type='submit' className='bg-orange rounded m-1 p-1'>
           Search
-        </Button>
-        <Button
-          color='primary'
-          size='sm'
+        </button>
+        <button
+          className='bg-teal text-white p-1 rounded'
           type='button'
           onClick={handleClearSearch}
         >
           Clear
-        </Button>
+        </button>
       </form>
       {loading ? (
         <Spinner color='dark' />
       ) : (
-        <ol>
+        <ol className='list-reset leading-normal'>
           {hits.map(hit => (
             <li key={hit.objectID}>
-              <a href={hit.url}>{hit.title}</a>
+              <a
+                href={hit.url}
+                className='indigo-dark hover:text-indigo-darkest'
+              >
+                {hit.title}
+              </a>
             </li>
           ))}
         </ol>
       )}
-    </AppWrapper>
+      {error && <div className='text-red font-bold'>{error.message}</div>}
+    </div>
   );
 }
